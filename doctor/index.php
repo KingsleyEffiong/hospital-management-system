@@ -214,6 +214,7 @@ new Def.Autocompleter.Search('icd9dx', 'https://clinicaltables.nlm.nih.gov/api/i
         </tbody>
     </table>
     <script>
+      
 let messageContainer = document.createElement('div');
 document.body.appendChild(messageContainer);
 

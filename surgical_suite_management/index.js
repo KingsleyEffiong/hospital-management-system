@@ -105,6 +105,55 @@ function uploadSection(){
     document.querySelector('.patientProfile').classList.add('hide');
     document.querySelector('.upload-section').classList.remove('hide');
 }
+
+     
+let messageContainer = document.createElement('div');
+document.body.appendChild(messageContainer);
+
+const createAlertMessage = (text, className, duration = 5000) => {
+  const message = document.createElement('div');
+  message.className = className + ' alert';
+  message.innerHTML = `
+    <div class="content">
+      <div class="message">
+        <div class="icon">
+          <i class="bi bi-exclamation-triangle-fill bootsrapIcon"></i>
+        </div>
+        <h4 style="color:white">${text}</h4>
+      </div>
+    </div>
+  `;
+  messageContainer.appendChild(message);
+  
+  if (duration !== 0) {
+    setTimeout(() => {
+      message.classList.add('hide');
+      setTimeout(() => message.remove(), 500);
+    }, duration);
+  }
+  
+  return message;
+};
+
+const successMessage = (text) => createAlertMessage(text, 'success');
+const infoMessage = (text) => createAlertMessage(text, 'info');
+const warningMessage = (text) => createAlertMessage(text, 'warning');
+const dangerMessage = (text) => createAlertMessage(text, 'danger', 4000);
+
+const acceptMessage = document.createElement('div');
+acceptMessage.className = 'alert info';
+acceptMessage.innerHTML = `
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <h3 style="color:white">Do you want to accept this patient?</h3>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="bg-white" id="accept__patient">Accept patient</button>
+      <button class="bg-white" id="reject__patient">Reject patient</button>
+    </div>
+  </div>
+`;
+messageContainer.appendChild(acceptMessage);
+acceptMessage.style.display = 'none';
+
  
 
 let patientId;
@@ -222,8 +271,10 @@ function patientVitalsRow(data) {
                     close_tranfer_patient_lab();
                 } else {
                     dangerMessage('Error: ' + data.error);
-                    // btnSubmit.html(btnText);
-                    // btnSubmit.prop('disabled', false);
+function name(params) {
+                        // btnSubmit.html(btnText);
+                        // btnSubmit.prop('disabled', false);
+}
                 }
             },
             error: function (xhr, status, error) {
