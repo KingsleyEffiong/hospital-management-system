@@ -1,4 +1,5 @@
-    //PROFILE IMAGE
+
+//PROFILE IMAGE
     function displayUserProfile(){
         document.querySelector(".profile_account").classList.toggle("hide");
     };
@@ -86,6 +87,10 @@ function bookinSection(){
     document.querySelector('#acceptedAppoitment').classList.add('hide');
     document.querySelector('.patientProfile').classList.add('hide');
     document.querySelector('.upload-section').classList.add('hide');
+    fetch_anostologist();
+    fetch_surgeon();
+    fetch_nurse();
+
 }
 function patientProfile(){
     document.querySelector('#pendingSurgeryList').classList.add('hide');
@@ -204,19 +209,24 @@ async function PatientProfiles() {
         const patientVitals = data.data.patient_vitals;
         console.log(patientVitals);
 
-        const tableBody = document.querySelector('#patient__vitals tbody');
-        tableBody.innerHTML = ''
-        if(patientVitals === null){
-            console.log('No data for patient')
-            const noTableData = tableBody.insertRow(0);
-            const noTableDataCell = noTableData.insertCell(0);
-            noTableDataCell.colSpan = 9;
-            noTableDataCell.innerHTML = 'No Vitals found';
-            noTableDataCell.style.textAlign = 'center';
-        }else{
-            patientVitalsRow(patientVitals);
-        }
-        patientProfile()
+        // const tableBody = document.querySelector('#patient__vitals tbody');
+        // tableBody.innerHTML = ''
+        // if(patientVitals === null){
+        //     console.log('No data for patient')
+        //     const noTableData = tableBody.insertRow(0);
+        //     const noTableDataCell = noTableData.insertCell(0);
+        //     noTableDataCell.colSpan = 9;
+        //     noTableDataCell.innerHTML = 'No Vitals found';
+        //     noTableDataCell.style.textAlign = 'center';
+        // }else{
+        //     patientVitalsRow(patientVitals);
+
+      
+        // }
+        patientProfile();
+              fetch_patient_lab_info(patientData.patient_id);
+            fetch_patient_radiology_info(patientData.patient_id);
+            fetch_patient_vitals_info(patientData.patient_id);
     } catch (error) {
         console.error("Error:", error);
     } finally {
@@ -225,21 +235,215 @@ async function PatientProfiles() {
     }
 }
 
-function patientVitalsRow(data) {
-    const tableBody = document.querySelector('#patient__vitals tbody');
-    const row = tableBody.insertRow();
-    row.insertCell(0).textContent = 'date'
-    row.insertCell(1).textContent = data.temperature || 'N/A'; 
-    row.insertCell(2).textContent = data.bp || 'N/A';  
-    row.insertCell(3).textContent = data.pulse || 'N/A';
-    row.insertCell(4).textContent = data.temperature || 'N/A'; 
-    row.insertCell(5).textContent = data.respiratory || 'N/A'; 
-    row.insertCell(6).textContent = data.spo2 || 'N/A'; 
-    row.insertCell(7).textContent = data.intake || 'N/A'; 
-    row.insertCell(8).textContent = data.weight || 'N/A'; 
-    row.insertCell(9).textContent = data.output || 'N/A';  
-    row.insertCell(10).textContent = data.bmi || 'N/A'; 
+function fetch_patient_lab_info(patient_id) {
+    var action = "fetch_patient_lab_info";
+    var dataString = "action=" + action + "&patient_id=" + patient_id;
+
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php",
+        data: dataString,
+        cache: false,
+        dataType: 'json',
+        success: function (response) {
+            if (response.success) {
+                const data = response.data;
+                const tableBody = document.querySelector('#lab_test_tab tbody');
+                
+                // Clear existing rows before appending new ones
+                tableBody.innerHTML = '';
+
+                // Loop through each record in the array
+                data.forEach(item => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = item.date || 'N/A';
+                    row.insertCell(1).textContent = item.time || 'N/A';
+
+                    // Parse the tests JSON and get the test names
+                    let testsObj = JSON.parse(item.tests || '{}');
+                    let testNames = Object.keys(testsObj).join(', ');
+                    row.insertCell(2).textContent = testNames || 'N/A';
+
+                    row.insertCell(3).textContent = item.test_specific || 'N/A';
+
+                    // Create a download link for the test result
+                    const resultCell = row.insertCell(4);
+                    if (item.test_result) {
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = item.test_result;
+                        downloadLink.textContent = 'Download';
+                        downloadLink.target = '_blank';
+                        resultCell.appendChild(downloadLink);
+                    } else {
+                        resultCell.textContent = 'N/A';
+                    }
+                });
+            } else {
+                console.error('Error:', response.message);
+                dangerMessage('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+        }
+    });
 }
+
+function fetch_patient_radiology_info(patient_id) {
+    var action = "fetch_patient_radiology_info";
+    var dataString = "action=" + action + "&patient_id=" + patient_id;
+
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php",
+        data: dataString,
+        cache: false,
+        dataType: 'json',
+        success: function (response) {
+            if (response.success) {
+                const data = response.data;
+                const tableBody = document.querySelector('#lab_rad_tab tbody');
+
+                // Check if tableBody exists
+                if (!tableBody) {
+                    console.error("Table body element not found.");
+                    return;
+                }
+
+                // Clear existing rows before appending new ones
+                tableBody.innerHTML = '';
+
+                // Loop through each record in the array
+                data.forEach(item => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = item.date || 'N/A';
+                    row.insertCell(1).textContent = item.time || 'N/A';
+
+                    // Safely parse the tests JSON to get test names
+                    let testNames = 'N/A';
+                    try {
+                        let testsObj = JSON.parse(item.tests || '{}');
+                        testNames = Object.keys(testsObj).join(', ') || 'N/A';
+                    } catch (error) {
+                        console.error("Error parsing tests JSON:", error);
+                    }
+                    row.insertCell(2).textContent = testNames;
+
+                    row.insertCell(3).textContent = item.test_specific || 'N/A';
+
+                    // Create a download link for the test result
+                    const resultCell = row.insertCell(4);
+                    if (item.test_result) {
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = item.test_result;
+                        downloadLink.textContent = 'Download';
+                        downloadLink.target = '_blank';
+                        resultCell.appendChild(downloadLink);
+                    } else {
+                        resultCell.textContent = 'N/A';
+                    }
+                });
+            } else {
+                console.error('Error:', response.message);
+                // Use your dangerMessage function for UI error display
+                dangerMessage('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            // Use your dangerMessage function for AJAX error display
+            dangerMessage('AJAX Error:', `${status}: ${error}`);
+        }
+    });
+}
+
+function fetch_patient_vitals_info(patient_id) {
+    var action = "fetch_patient_vital_info";
+    var dataString = "action=" + action + "&patient_id=" + patient_id;
+
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php",
+        data: dataString,
+        cache: false,
+        dataType: 'json',
+        success: function (response) {
+            if (response.success) {
+                const data = response.data;
+                const tableBody = document.getElementById('vital_tab').getElementsByTagName('tbody')[0]; // Access tbody correctly
+
+                // Clear existing rows before appending new ones
+                tableBody.innerHTML = '';
+
+                // Loop through each record in the array
+                data.forEach(item => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = item.date || 'N/A'; // Assuming a date or timestamp field
+                    row.insertCell(1).textContent = item.temperature || 'N/A';
+                    row.insertCell(2).textContent = item.blood_pressure || 'N/A';
+                    row.insertCell(3).textContent = item.pulse || 'N/A';
+                    row.insertCell(4).textContent = item.respiratory_rate || 'N/A';
+                    row.insertCell(5).textContent = item.spO2 || 'N/A';
+                    row.insertCell(6).textContent = item.weight || 'N/A';
+                    row.insertCell(7).textContent = item.intake || 'N/A';
+                    row.insertCell(8).textContent = item.output || 'N/A';
+                    row.insertCell(9).textContent = item.bmi || 'N/A';
+                });
+            } else {
+                console.error('Error:', response.message);
+                // Use your dangerMessage function for UI error display
+                dangerMessage('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            // Use your dangerMessage function for AJAX error display
+            dangerMessage('AJAX Error:', `${status}: ${error}`);
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function patientVitalsRow(data) {
+//     const tableBody = document.querySelector('#patient__vitals tbody');
+//     const row = tableBody.insertRow();
+//     row.insertCell(0).textContent = 'date'
+//     row.insertCell(1).textContent = data.temperature || 'N/A'; 
+//     row.insertCell(2).textContent = data.bp || 'N/A';  
+//     row.insertCell(3).textContent = data.pulse || 'N/A';
+//     row.insertCell(4).textContent = data.temperature || 'N/A'; 
+//     row.insertCell(5).textContent = data.respiratory || 'N/A'; 
+//     row.insertCell(6).textContent = data.spo2 || 'N/A'; 
+//     row.insertCell(7).textContent = data.intake || 'N/A'; 
+//     row.insertCell(8).textContent = data.weight || 'N/A'; 
+//     row.insertCell(9).textContent = data.output || 'N/A';  
+//     row.insertCell(10).textContent = data.bmi || 'N/A'; 
+// }
 
 
 
@@ -266,6 +470,7 @@ function patientVitalsRow(data) {
             success: function (data) {
                 if (data.check === "success") {
                     successMessage("Appointment has been moved successfully");
+                    alert("Appointment has been moved successfully");
                     // btnSubmit.html('Transfer');
                     // btnSubmit.prop('disabled', false);
                     close_tranfer_patient_lab();
@@ -288,3 +493,187 @@ function name(params) {
 
 
 
+  function fetchProcedures(query) {
+    if (query.length < 2) {
+        document.getElementById("procedureDropdown").style.display = "none"; // Hide dropdown when input is too short
+        return;
+    }
+
+    fetch(`https://clinicaltables.nlm.nih.gov/api/procedures/v3/search?terms=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            let suggestions = data[3]; // Array of procedure names
+            populateDropdown(suggestions);
+        })
+        .catch(error => console.log("Error fetching procedures:", error));
+}
+
+function populateDropdown(suggestions) {
+    const dropdown = document.getElementById("procedureDropdown");
+    dropdown.innerHTML = ""; // Clear previous options
+    if (suggestions.length === 0) {
+        dropdown.style.display = "none"; // Hide if no suggestions
+        return;
+    }
+    suggestions.forEach(surgery => {
+        const option = document.createElement("option");
+        option.value = surgery[0]; // Set the value as procedure name
+        option.text = surgery[0];
+        dropdown.appendChild(option);
+    });
+    dropdown.style.display = "block"; // Show dropdown with suggestions
+}
+
+function selectProcedure(procedure) {
+    document.getElementById("procedure").value = procedure;
+    document.getElementById("procedureDropdown").style.display = "none"; // Hide dropdown after selection
+}
+
+
+
+function fetch_anostologist() {
+    var action = "fetch_anostologist";
+    var dataString = "action=" + action;
+
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php",
+        data: dataString,
+        cache: false,
+        dataType: 'json',
+        success: function(data) {
+            if (data.check === "success") {
+                populateAnesthesiologistDropdown(data.anesthesiologists);
+                close_tranfer_patient_lab();
+            } else {
+                dangerMessage('Error: ' + data.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            dangerMessage('AJAX Error: ' + error);
+        }
+    });
+}
+
+function populateAnesthesiologistDropdown(anesthesiologists) {
+    var dropdown = document.getElementById("anesthesiologistDropdown");
+    dropdown.innerHTML = ""; // Clear existing options
+
+    anesthesiologists.forEach(function(anesthesiologist) {
+        var option = document.createElement("option");
+        option.value = anesthesiologist.anostologist_id;
+        option.text = anesthesiologist.fullname;
+        dropdown.appendChild(option);
+    });
+}
+
+
+
+function fetch_surgeon() {
+    var action = "fetch_surgeon";
+    var dataString = "action=" + action;
+
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php",
+        data: dataString,
+        cache: false,
+        dataType: 'json',
+        success: function(data) {
+            if (data.check === "success") {
+                populatesurgeonDropdown(data.surgeon);
+                // close_tranfer_patient_lab();
+            } else {
+                dangerMessage('Error: ' + data.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            dangerMessage('AJAX Error: ' + error);
+        }
+    });
+}
+
+function populatesurgeonDropdown(surgeon) {
+    var dropdown = document.getElementById("surgeonDropdown");
+    dropdown.innerHTML = ""; // Clear existing options
+
+    surgeon.forEach(function(surgeon) {
+        var option = document.createElement("option");
+        option.value = surgeon.surgeon_id;
+        option.text = surgeon.fullname;
+        dropdown.appendChild(option);
+    });
+}
+
+function fetch_nurse() {
+    var action = "fetch_nurse";
+    var dataString = "action=" + action;
+
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php",
+        data: dataString,
+        cache: false,
+        dataType: 'json',
+        success: function(data) {
+            if (data.check === "success") {
+                populatenurseDropdown(data.nurse);
+                // close_tranfer_patient_lab();
+            } else {
+                dangerMessage('Error: ' + data.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            dangerMessage('AJAX Error: ' + error);
+        }
+    });
+}
+
+function populatenurseDropdown(nurse) {
+    var dropdown = document.getElementById("nurseDropdown");
+    dropdown.innerHTML = ""; // Clear existing options
+
+    nurse.forEach(function(nurse) {
+        var option = document.createElement("option");
+        option.value = nurse.nurse_id;
+        option.text = nurse.fullname;
+        dropdown.appendChild(option);
+    });
+}
+
+
+function fetch_theatre() {
+    var action = "fetch_theatre";
+    var dataString = "action=" + action;
+
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php",
+        data: dataString,
+        cache: false,
+        dataType: 'json',
+        success: function(data) {
+            if (data.check === "success") {
+                populateTheatreDropdown(data.theatre);
+                // close_tranfer_patient_lab();
+            } else {
+                dangerMessage('Error: ' + data.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            dangerMessage('AJAX Error: ' + error);
+        }
+    });
+}
+
+function populateTheatreDropdown(theatre) {
+    var dropdown = document.getElementById("theatreDropdown");
+    dropdown.innerHTML = ""; // Clear existing options
+
+    theatre.forEach(function(theatre) {
+        var option = document.createElement("option");
+        option.value = theatre.theatre_id;
+        option.text = theatre.theatre_name;
+        dropdown.appendChild(option);
+    });
+}

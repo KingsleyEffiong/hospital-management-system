@@ -164,9 +164,11 @@
                                             
                                             $sql = "SELECT lab_appointment_tab.*, patient_tab.patient_passport 
                                             FROM lab_appointment_tab
-                                            JOIN patient_tab ON lab_appointment_tab.patient_id = patient_tab.patient_id";
-                                            
-                                            $result = $conn->query($sql);
+                                            JOIN patient_tab ON lab_appointment_tab.patient_id = patient_tab.patient_id
+                                            WHERE lab_appointment_tab.status_id = '0'";
+                                    
+                                    $result = $conn->query($sql);
+                                    
                                             
                                             
                                             
@@ -189,11 +191,13 @@
                     <td><?php echo htmlspecialchars($appointment['patient_id']); ?></td>
                     <td><?php echo htmlspecialchars($appointment['appointment_date']); ?></td>
                     <td><?php echo htmlspecialchars($appointment['time']); ?></td>
+                  
                     <td>
-                        <button class="bg-white" type="button" onclick="click_labouratory_examination('<?php echo htmlspecialchars($appointment['patient_id']); ?>')">Accept</button>
+                        <button class="bg-white" type="button" onclick="click_labouratory_examination('<?php echo htmlspecialchars($appointment['patient_id']); ?>', '<?php echo htmlspecialchars($appointment['lab_scientist_appointment_id']); ?>')">Accept</button>
+
                     </td>
                     <td>
-                        <button class="bg-white" type="button" onclick="reject_labouratory_examination(<?php echo htmlspecialchars($appointment['patient_id']); ?>)">Reject</button>
+                        <button class="bg-white" type="button" onclick="reject_labouratory_examination(<?php echo htmlspecialchars($appointment['patient_id']),$appointment['lab_scientist_appointment_id']; ?>)">Reject</button>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -206,7 +210,7 @@
         </div>
 
         <script>
-                function click_labouratory_examination(patient_id) {
+                function click_labouratory_examination(patient_id,appointment_id) {
                     // Use the built-in confirm dialog
                     if (confirm("Are you sure you want to accept this patient?")) {
                         // Show the lab input section
@@ -216,7 +220,7 @@
                         }
 
                         // Construct data string to send in the AJAX request
-                        var dataString = 'patient_id=' + encodeURIComponent(patient_id);
+                        var dataString = 'patient_id=' + encodeURIComponent(patient_id)+'&appointment_id=' + encodeURIComponent(appointment_id);
 
                         // Perform AJAX request
                         $.ajax({
@@ -243,53 +247,60 @@
         </script>
 
 
-<div class="approved_appoitment hide">  
-<div class="patient_list_div">
-            <div class="search_bar_container">
-                <h3>Approved appoitments</h3>
-                <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Search here">
-                </div>
-                <table>
-                                        <thead>
-                                        <tr>
-                                                <td>S/N</td>
-                                                <td>PASSPORT</td>
-                                                <td>Patient Name</td>
-                                                <td>patient id</td>
-                                                <td>Status</td>
-                                                <td>Delete Patient</td>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr>
-                                        <td>1</td>
+        <div class="approved_appoitment hide">  
+        <div class="patient_list_div">
+                    <div class="search_bar_container">
+                        <h3>Approved appoitments</h3>
+                        <i class="bi bi-search"></i>
+                            <input type="text" placeholder="Search here">
+                        </div>
+                        <table>
+                            <?php 
+                           $sql = "SELECT account_appointment_confirm_tab.*, patient_tab.patient_passport, patient_tab.fullname 
+                           FROM account_appointment_confirm_tab
+                           JOIN patient_tab ON account_appointment_confirm_tab.patient_id = patient_tab.patient_id
+                           WHERE account_appointment_confirm_tab.`from` = 'Lab'";
+                   
+                            $result = mysqli_query($conn, $sql);
+                   
+                            ?>
+                            <thead>
+                                <tr>
+                                    <td>S/N</td>
+                                    <td>PASSPORT</td>
+                                    <td>Patient Name</td>
+                                    <td>Patient ID</td>
+                                    <td>Status</td>
+                                    <td>Actions</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                $serial = 1; // Serial number initialization
+                                while ($row = mysqli_fetch_assoc($result)) {
+                                    // Assuming passport image URL is stored in the database
+                                    $passportImage = $row['passport_image'] ? $row['passport_image'] : 'path/to/default-image.jpg'; // Default image if none exists
+                                    ?>
+                                    <tr>
+                                        <td><?php echo $serial++; ?></td>
                                         <td>
-                                                <img src="" alt="">
+                                        <img src="<?php echo htmlspecialchars($website_url . '/uploaded_files/profile_pix/patient/' . $row['patient_passport']); ?>" alt="Profile Picture" width="50" height="50">
                                         </td>
-                                        <td>Kingsley effiong</td>
-                                        <td>PAT0001</td>
-                                        <td>Pending transaction</td>
-                                <td><i class="bi bi-x-square"></i></td>
-                                        </tr>
-                                        </tbody>
-                                        <tbody>
-                                        <tr>
-                                        <td>1</td>
+                                        <td><?php echo htmlspecialchars($row['fullname']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['patient_id']); ?></td>
                                         <td>
-                                                <img src="" alt="">
+                                            <button class="accept-btn" onclick="uploadResult('<?php echo $row['patient_id']; ?>')">Upload Test Result</button>
                                         </td>
-                                        <td>Kingsley effiong</td>
-                                        <td>PAT0001</td>
                                         <td>
-                                                <button class="accept-btn" onclick="uploadResult()">Upload test result</button>
+                                            <i class="bi bi-x-square" onclick="deletePatient('<?php echo $row['patient_id']; ?>')"></i>
                                         </td>
-                                <td>
-                                        <i class="bi bi-x-square"></i>
-                                </td>
-                                        </tr>
-                                        </tbody>
+                                    </tr>
+                                    <?php
+                                }
+                                ?>
+                            </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>

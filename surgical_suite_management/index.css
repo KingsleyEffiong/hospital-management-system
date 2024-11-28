@@ -868,3 +868,13 @@ input[type="radio"]:checked::after {
 .hidden{
     display: none;
 }
+
+
+/* /////////////// */
+
+#procedureDropdown {
+  width: 100%;
+  position: absolute;
+  z-index: 1000;
+}
+

@@ -54,7 +54,7 @@
 				sleep(1);
 		?>
 					<script>
-					window.parent(location="../Frontend/superadmin/dashboard.php");
+					window.parent(location="../superadmin/dashboard");
 					</script>
 		<?php
 			

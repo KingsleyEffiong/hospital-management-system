@@ -332,11 +332,12 @@ function isPatientStable() {
 }
 
 function bookHealthRecordForm() {
-  const patient_name = document.querySelector('#name').value
-  const patient_id = document.querySelector('#name').value
-  const comment = document.querySelector('#comment').value
-  var action = 'health_record';
-    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment;
+  const patient_name = document.querySelector('#bookhealthrecordForm #name').value;
+  const patient_id = document.querySelector('#bookhealthrecordForm #id').value;
+  const comment = document.getElementById('health_record_comment').value;
+  var emergency_unit_id = document.getElementById('emergency_unit_id').value;
+  var action = 'transfer_to_health_record';
+    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment+ "&emergency_unit_id=" + emergency_unit_id;
 
     $.ajax({
         type: 'POST',
@@ -348,7 +349,9 @@ function bookHealthRecordForm() {
             if (data.success === true) { 
                 successMessage(data.message || 'Patient has been transfered successfully');
                 setTimeout(()=>{
-                      window.location.reload();
+                     
+                      closeModal('healthrecordForm');
+                      patientList();
                 },2000)
               
             } else if (data.success === false) {
@@ -417,12 +420,12 @@ function bookNurseForm() {
   const patient_name = document.querySelector('#booknurseForm #name').value
   const patient_id = document.querySelector('#booknurseForm #name').value
   const comment = document.querySelector('#booknurseForm #comment').value
-  const time = document.querySelector('#booknurseForm #selected_time').value
-  const date = document.querySelector('#booknurseForm #selected_date').value
+  const selected_time = document.querySelector('#booknurseForm #selected_time').value
+  const selected_date = document.querySelector('#booknurseForm #selected_date').value
   const nurse_id = document.querySelector('#booknurseForm #select_nurse').value
 
   var action = 'transfer_to_nurse';
-  var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&nurse_id=" + nurse_id;
+  var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&selected_time=" + selected_time + "&selected_date=" + selected_date + "&nurse_id=" + nurse_id;
 
     $.ajax({
         type: 'POST',
@@ -434,7 +437,8 @@ function bookNurseForm() {
             if (data.success === true) { 
                 successMessage(data.message || 'Patient has been transfered successfully');
                 setTimeout(()=>{
-                      window.location.reload();
+                    //   window.location.reload();
+                    closeModal('nurseForm');
                 },2000)
               
             } else if (data.success === false) {
@@ -451,20 +455,68 @@ function bookNurseForm() {
         }
     });
 }
+
+
+
+////////surgical suite
+function get_surgical_suite() {
+    $('#select_surgical_suite').html('<option>LOADING...</option>'); // Set loading message
+    $('#select_surgical_suite').prop('disabled', true); // Disable the dropdown
+
+    var action = 'get_surgical_unit'; // No roles needed
+  
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php", // Adjust URL as needed
+        data: { action: action }, // Only action is passed, no roles
+        cache: false,
+        dataType: 'json',
+        success: function (response) {
+            // Check for success and populate the dropdown
+            if (response.success) {
+                populateSurgDropdown(response.surgical_unit); // Populate with surgical_suite data
+            } else {
+                console.error('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+        },
+    });
+}
+
+function populateSurgDropdown(surgical_unit) {
+    var surgical_suiteDropdown = document.getElementById('select_surgical_suite');
+  
+    // Clear existing options
+    surgical_suiteDropdown.innerHTML = '';
+  
+    // Add options based on the fetched data
+    for (var i = 0; i < surgical_unit.length; i++) {
+        var option = document.createElement('option');
+        option.value = surgical_unit[i].surgical_unit_id; // Assuming surgical_suite object has 'surgical_suite_id'
+        option.textContent = surgical_unit[i].fullname; // Assuming surgical_suite object has 'surgical_suite_name'
+        surgical_suiteDropdown.appendChild(option);
+    }
+  
+    // Enable the dropdown after populating options
+    $('#select_surgical_suite').prop('disabled', false);
+}
+ 
 
 
 ////////surgical suite
 
 function bookSurgicalsuiteForm() {
   const patient_name = document.querySelector('#booksurgicalsuiteForm #name').value
-  const patient_id = document.querySelector('#booksurgicalsuiteForm #name').value
+  const patient_id = document.querySelector('#booksurgicalsuiteForm #id').value
   const comment = document.querySelector('#booksurgicalsuiteForm #comment').value
   const time = document.querySelector('#booksurgicalsuiteForm #selected_time').value
   const date = document.querySelector('#booksurgicalsuiteForm #selected_time').value
-  const suravailable = document.querySelector('#booksurgicalsuiteForm #select_sur').value
+  const staffavailable = document.querySelector('#booksurgicalsuiteForm #select_surgical_suite').value
   
   var action = 'transfer_to_surgical_suite';
-    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&staffavailable=" + suravailable;
+    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&staffavailable=" + staffavailable;
 
     $.ajax({
         type: 'POST',
@@ -476,7 +528,8 @@ function bookSurgicalsuiteForm() {
             if (data.success === true) { 
                 successMessage(data.message || 'Patient has been transfered successfully');
                 setTimeout(()=>{
-                      window.location.reload();
+                    //   window.location.reload();
+                    closeModal('surgicalsuiteForm');
                 },2000)
               
             } else if (data.success === false) {
@@ -495,58 +548,155 @@ function bookSurgicalsuiteForm() {
 }
 
 
+
+////////get lab
+function get_lab() {
+    $('#select_lab').html('<option>LOADING...</option>'); // Set loading message
+    $('#select_lab').prop('disabled', true); // Disable the dropdown
+
+    var action = 'get_lab_unit'; // No roles needed
+  
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php", // Adjust URL as needed
+        data: { action: action }, // Only action is passed, no roles
+        cache: false,
+        dataType: 'json',
+        success: function (response) {
+            // Check for success and populate the dropdown
+            if (response.success) {
+                populateLabDropdown(response.lab_unit); // Populate with lab data
+            } else {
+                console.error('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+        },
+    });
+}
+
+function populateLabDropdown(lab_unit) {
+    var labDropdown = document.getElementById('select_lab');
+  
+    // Clear existing options
+    labDropdown.innerHTML = '';
+  
+    // Add options based on the fetched data
+    for (var i = 0; i < lab_unit.length; i++) {
+        var option = document.createElement('option');
+        option.value = lab_unit[i].lab_scientist_id; // Assuming lab object has 'lab_id'
+        option.textContent = lab_unit[i].lab_scientist_name; // Assuming lab object has 'lab_name'
+        labDropdown.appendChild(option);
+    }
+  
+    // Enable the dropdown after populating options
+    $('#select_lab').prop('disabled', false);
+}
+ 
 ////lab
 
 function bookLabForm() {
-  const patient_name = document.querySelector('#booklabForm #name').value
-  const patient_id = document.querySelector('#booklabForm #name').value
-  const comment = document.querySelector('#booklabForm #comment').value
-  const time = document.querySelector('#booklabForm #selected_time').value
-  const date = document.querySelector('#booklabForm #selected_date').value
-  const labavailable = document.querySelector('#booklabForm #select_lab').value
+    const patient_name = document.querySelector('#booklabForm #name').value
+    const patient_id = document.querySelector('#booklabForm #id').value
+    const comment = document.querySelector('#booklabForm #comment').value
+    const time = document.querySelector('#booklabForm #selected_time').value
+    const date = document.querySelector('#booklabForm #selected_date').value
+    const staffavailable = document.querySelector('#booklabForm #select_lab').value
+    
+    var action = 'transfer_to_lab';
+      var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&staffavailable=" + staffavailable;
   
-  var action = 'health_record';
-    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&staffavailable=" + labavailable;
+      $.ajax({
+          type: 'POST',
+          url: "config/code.php",
+          data: dataString,
+          cache: false,
+          dataType: 'json',
+          success: function (data) {
+              if (data.success === true) { 
+                  successMessage(data.message || 'Patient has been transfered successfully');
+                  closeModal('labForm');
+                  setTimeout(()=>{
+                    
+                        window.location.reload();
+                  },2000)
+                
+              } else if (data.success === false) {
+                  dangerMessage(data.message || 'Error occured during transfer.');
+              }
+              $btnSubmit.html('Transfer');
+              $btnSubmit.prop('disabled', false);
+          },
+          error: function (xhr, status, error) {
+              console.error('AJAX Error:', error);
+              dangerMessage('An error occurred while processing your request.');
+              $btnSubmit.html(btnText);
+              $btnSubmit.prop('disabled', false);
+          }
+      });
+  }
+  
 
+////////get rad
+function get_radiology() {
+    $('#select_rad').html('<option>LOADING...</option>'); // Set loading message
+    $('#select_rad').prop('disabled', true); // Disable the dropdown
+
+    var action = 'get_radiology'; // No roles needed
+  
     $.ajax({
         type: 'POST',
-        url: "config/code.php",
-        data: dataString,
+        url: "config/code.php", // Adjust URL as needed
+        data: { action: action }, // Only action is passed, no roles
         cache: false,
         dataType: 'json',
-        success: function (data) {
-            if (data.success === true) { 
-                successMessage(data.message || 'Patient has been transfered successfully');
-                setTimeout(()=>{
-                      window.location.reload();
-                },2000)
-              
-            } else if (data.success === false) {
-                dangerMessage(data.message || 'Error occured during transfer.');
+        success: function (response) {
+            // Check for success and populate the dropdown
+            if (response.success) {
+                populateRadDropdown(response.radiology); // Populate with rad data
+            } else {
+                console.error('Error:', response.message);
             }
-            $btnSubmit.html('Transfer');
-            $btnSubmit.prop('disabled', false);
         },
         error: function (xhr, status, error) {
-            console.error('AJAX Error:', error);
-            dangerMessage('An error occurred while processing your request.');
-            $btnSubmit.html(btnText);
-            $btnSubmit.prop('disabled', false);
-        }
+            console.error('AJAX Error:', status, error);
+        },
     });
 }
+
+function populateRadDropdown(rad_unit) {
+    var radDropdown = document.getElementById('select_rad');
+  
+    // Clear existing options
+    radDropdown.innerHTML = '';
+  
+    // Add options based on the fetched data
+    for (var i = 0; i < rad_unit.length; i++) {
+        var option = document.createElement('option');
+        option.value = rad_unit[i].radiology_id; // Assuming rad object has 'rad_id'
+        option.textContent = rad_unit[i].fullname; // Assuming rad object has 'rad_name'
+        radDropdown.appendChild(option);
+    }
+  
+    // Enable the dropdown after populating options
+    $('#select_rad').prop('disabled', false);
+}
+ 
+
+
 
 ///////radiology 
 function bookRadForm() {
-  const patient_name = document.querySelector('#bookradiologyForm #name').value
-  const patient_id = document.querySelector('#bookradiologyForm #name').value
-  const comment = document.querySelector('#bookradiologyForm #comment').value
-  const time = document.querySelector('#bookradiologyForm #selected_time').value
-  const date = document.querySelector('#bookradiologyForm #selected_date').value
-  const radavailable = document.querySelector('#bookradiologyForm #select_rad').value
+  const patient_name = document.querySelector('#bookradiologyForm #name').value;
+  const patient_id = document.querySelector('#bookradiologyForm #id').value;
+  const comment = document.querySelector('#bookradiologyForm #comment').value;
+  const time = document.querySelector('#bookradiologyForm #selected_time').value;
+  const date = document.querySelector('#bookradiologyForm #selected_date').value;
+  const radavailable = document.querySelector('#bookradiologyForm #select_rad').value;
   
-  var action = 'health_record';
-    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&staffavailable=" + radavailable;
+  var action = 'transfer_to_radiology';
+    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&radavailable=" + radavailable;
 
     $.ajax({
         type: 'POST',
@@ -557,7 +707,9 @@ function bookRadForm() {
         success: function (data) {
             if (data.success === true) { 
                 successMessage(data.message || 'Patient has been transfered successfully');
+                closeModal('radiologyForm');
                 setTimeout(()=>{
+                  
                       window.location.reload();
                 },2000)
               
@@ -575,19 +727,68 @@ function bookRadForm() {
         }
     });
 }
+
+
+
+////////get morgue
+function get_morgue() {
+    $('#select_morgue').html('<option>LOADING...</option>'); // Set loading message
+    $('#select_morgue').prop('disabled', true); // Disable the dropdown
+
+    var action = 'get_morgue'; // No roles needed
+  
+    $.ajax({
+        type: 'POST',
+        url: "config/code.php", // Adjust URL as needed
+        data: { action: action }, // Only action is passed, no roles
+        cache: false,
+        dataType: 'json',
+        success: function (response) {
+            // Check for success and populate the dropdown
+            if (response.success) {
+                populateMorgueDropdown(response.morgue); // Populate with rad data
+            } else {
+                console.error('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+        },
+    });
+}
+
+function populateMorgueDropdown(morgue_unit) {
+    var MorgueDropdown = document.getElementById('select_morgue');
+  
+    // Clear existing options
+    MorgueDropdown.innerHTML = '';
+  
+    // Add options based on the fetched data
+    for (var i = 0; i < morgue_unit.length; i++) {
+        var option = document.createElement('option');
+        option.value = morgue_unit[i].morgue_id; // Assuming rad object has 'rad_id'
+        option.textContent = morgue_unit[i].fullname; // Assuming rad object has 'rad_name'
+        MorgueDropdown.appendChild(option);
+    }
+  
+    // Enable the dropdown after populating options
+    $('#select_morgue').prop('disabled', false);
+}
+ 
 
 
 ////////morgue
 function bookMorgueForm() {
   const patient_name = document.querySelector('#bookmorgueForm #name').value
-  const patient_id = document.querySelector('#bookmorgueForm #name').value
+  const patient_id = document.querySelector('#bookmorgueForm #id').value
   const comment = document.querySelector('#bookmorgueForm #comment').value
   const time = document.querySelector('#bookmorgueForm #selected_time').value
   const date = document.querySelector('#bookmorgueForm #selected_date').value
   const morgueavailable = document.querySelector('#bookmorgueForm #select_morgue').value
+  var emergency_unit_id = document.getElementById("emergency_unit_id").value;
   
-  var action = 'health_record';
-    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&staffavailable=" + morgueavailable;
+  var action = 'transfer_to_morgue';
+    var dataString = "action=" + action + "&patient_name=" + patient_name + "&patient_id=" + patient_id + "&comment=" + comment + "&time=" + time + "&date=" + date + "&morgueavailable=" + morgueavailable + "&emergency_unit_id=" +emergency_unit_id;
 
     $.ajax({
         type: 'POST',

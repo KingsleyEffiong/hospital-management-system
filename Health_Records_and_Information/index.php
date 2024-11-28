@@ -555,21 +555,45 @@
                 <h3>Emergency list</h3>
                 <input type="text" name="" id="wsearch" placeholder="Search">
             </div>
-            <table id="table1">
-                <thead>
-                    <tr>
-                        <td>S/N</td>
-                        <td>Patient Name</td>
-                        <td>Patient Emergecy ID</td>
-                        <td>Date of Admission</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="5">No emergency patient available</td>
-                    </tr>
-                </tbody>
-            </table>
+            <?php
+                // Assuming you have a valid database connection in $conn
+                $sql = "SELECT * FROM emergency_patient_tab WHERE status_id = '1'";
+                $result = mysqli_query($conn, $sql);
+
+                echo '<table id="table1">
+                        <thead>
+                            <tr>
+                                <td>S/N</td>
+                                <td>Patient Name</td>
+                                <td>Patient Emergency ID</td>
+                                <td>Date of Admission</td>
+                                <td>Option</td>
+                            </tr>
+                        </thead>
+                        <tbody>';
+
+                // Check if there are any records
+                if (mysqli_num_rows($result) > 0) {
+                    $sn = 1; // Serial number counter
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo '<tr>
+                                <td>' . $sn++ . '</td>
+                                <td>' . htmlspecialchars($row['Epatient_name']) . '</td>
+                                <td>' . htmlspecialchars($row['emergency_patient_id']) . '</td>
+                                <td>' . htmlspecialchars($row['date']) . '</td>
+                                 <td>  <i class ="bi-three-dots"></i></td>
+                            </tr>';
+                    }
+                } else {
+                    // No records found
+                    echo '<tr>
+                            <td colspan="4">No emergency patients available</td>
+                        </tr>';
+                }
+
+                echo '</tbody></table>';
+                ?>
+
             </div>
     </div>
 

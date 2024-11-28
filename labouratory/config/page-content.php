@@ -5,6 +5,7 @@
 
 
 $patient_id = $_POST['patient_id'];
+$appointment_id = $_POST['appointment_id'];
 
  
 
@@ -573,7 +574,9 @@ $patient_id = $_POST['patient_id'];
                 <div class="totalprice">
                         <p>Total</p>
                         <p id="totalLabTest"></p>
-                        <p style="display:block" value="<?php echo $patient_id ?>" id="patient_id"><?php echo $patient_id ?> </p>
+                        <input type="hidden" value="<?php echo $patient_id ?>" id="patient_id"/>
+                        <input type="hidden" value="<?php echo $appointment_id ?>" id="appointment_id"/>
+                        
                 </div>
                 <button onclick="bookNow()">Book Now</button>
                 <button onclick="collapseTestBooking()">Add more test</button>

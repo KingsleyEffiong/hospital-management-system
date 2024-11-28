@@ -326,7 +326,7 @@ $page = "surgical_suite_dash"; // Assign the value "surgical_suite_dash" to the 
 
  <div class="labouratoryData listing">
  <h3>LABOURATORY TESTS</h3>
-  <table>
+  <table id="lab_test_tab">
     <thead>
       <tr>
       <td>Date</td>
@@ -338,10 +338,10 @@ $page = "surgical_suite_dash"; // Assign the value "surgical_suite_dash" to the 
     </thead>
     <tbody>
       <tr>
-        <td>23-08-2023</td>
-        <td>23:10</td>
-        <td>Immunoassay Single Tests</td>
-        <td> Drug Screening Test</td>
+        <td>xxxxxxxxxx</td>
+        <td>xxxxxxxxxx</td>
+        <td>xxxxxxxxxx</td>
+        <td>xxxxxxxxxx</td>
         <td>download</td>
       </tr>
     </tbody>
@@ -351,81 +351,85 @@ $page = "surgical_suite_dash"; // Assign the value "surgical_suite_dash" to the 
  
  <div class="radiologyData listing">
  <h3>RADIOLOGY TESTS</h3>
-  <table>
-    <thead>
-      <tr>
-      <td>Date</td>
-      <td>Time</td>
-      <td>Kind of Test</td>
-      <td>Test Specific</td>
-      <td>Test Result</td>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>23-08-2023</td>
-        <td>23:10</td>
-        <td>Immunoassay Single Tests</td>
-        <td> Drug Screening Test</td>
-        <td>download</td>
-      </tr>
-    </tbody>
-  </table>
+
+    <table id="lab_rad_tab">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Kind of Test</th>
+                <th>Test Specific</th>
+                <th>Test Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>xxxxxxxxxx</td>
+                <td>xxxxxxxxxx</td>
+                <td>xxxxxxxxxx</td>
+                <td>xxxxxxxxxx</td>
+                <td>download</td>
+            </tr>
+        </tbody>
+    </table>
  </div>
 
  <div class="vitalData listing" style="overflow: auto">
  <h3>VITAL DATA</h3>
-  <table id="patient__vitals">
+ <table id="vital_tab">
     <thead>
-      <tr>
-      <td> 24/7</td> 	 	 	
-      <td>Temp(C)</td>
-      <td>BP(mmdg)</td>
-      <td>Pulse(bp/m)</td>
-      <td>Resp.(cm)</td>
-      <td>Spo2(%)</td>
-      <td>Weigdt(kg)</td>
-      <td>Intake(m/s)</td>
-      <td>Output</td>
-      <td>BMI</td>
-      </tr>
+        <tr>
+            <th>Date</th>
+            <th>Temp (°C)</th>
+            <th>BP (mmHg)</th>
+            <th>Pulse (bpm)</th>
+            <th>Resp. (cm)</th>
+            <th>SpO2 (%)</th>
+            <th>Weight (kg)</th>
+            <th>Intake (mL/s)</th>
+            <th>Output</th>
+            <th>BMI</th>
+        </tr>
     </thead>
     <tbody>
+        <!-- Data will be populated here -->
     </tbody>
-  </table>
+</table>
+
  </div>
 
- <div class="select-ward listing">
-  <h3>Select Ward</h3>
-  <div class="each_sections">
-    <div class="form-control">
-    <label>Ward 1</label>
-  <select name="" id="">
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-  </select>
+  <!-- <div class="select-ward listing">
+    <h3>Select Ward</h3>
+    <div class="each_sections">
+      <div class="form-control">
+      <label>Ward 1</label>
+    <select name="" id="">
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+    </select>
+      </div>
+
+      <div class="form-control">
+    <label>Ward 2</label>
+    <select name="" id="">
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+      <option value=""></option>
+    </select>
     </div>
-
-    <div class="form-control">
-  <label>Ward 2</label>
-  <select name="" id="">
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-    <option value=""></option>
-  </select>
   </div>
- </div>
- <button class="bg-white">Book ward</button>
- <button class="bg-white" onclick="uploadSection()">Upload consent form</button>
- <button class="bg-white" onclick="bookinSection()">Book patient</button>
-</div>
+  <button class="bg-white">Book ward</button>
+  <button class="bg-white" onclick="uploadSection()">Upload consent form</button>
+ 
+  </div> -->
+  <button class="bg-white" onclick="bookinSection()">Book patient</button>
 </div>
 
 
@@ -435,11 +439,16 @@ $page = "surgical_suite_dash"; // Assign the value "surgical_suite_dash" to the 
                 <form action="">
                     <div class="each_sections">
                     <div class="form-control">
-                        <label for="">Type of Surgery & Amount</label>
-                        <input type="text">
-                    </div>
+                    <label for="procedure">Type of Surgery & Amount</label>
+                    <input type="text" id="procedure" onkeyup="fetchProcedures(this.value)" autocomplete="off">
+                    <select id="procedureDropdown" size="5" style="display:none;" onchange="selectProcedure(this.value)">
+                    </select>
+
+                    
+
+                    
                     <div class="form-control">
-                        <label for="">Amount</label>
+                        <label for="">Total Amount</label>
                         <input type="text">
                     </div>
                     </div>
@@ -460,48 +469,65 @@ $page = "surgical_suite_dash"; // Assign the value "surgical_suite_dash" to the 
                     <div class="each_sections">
                     <div class="form-control">
                         <label for="">Select Surgeon</label>
-                        <select name="" id="">
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
+                        <select id="surgeonDropdown">
+                            <option value="">Select Surgeon</option>
                         </select>
                     </div>
                     <div class="form-control">
                         <label for="">Select Anostologist</label>
-                        <select name="" id="">
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
+                        <select id="anesthesiologistDropdown">
+                            <option value="">Select Anesthesiologist</option>
                         </select>
                     </div>
                     </div>
                     <div class="each_sections">
                     <div class="form-control">
                         <label for="">Select Nurse</label>
-                        <select name="" id="">
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
+                        <select id="nurseDropdown">
+                            <option value="">Select Nurse</option>
                         </select>
                     </div>
                     <div class="form-control">
                         <label for="">Select Opeating Room</label>
-                        <select name="" id="">
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
-                            <option value=""></option>
+                        <select id="theatreDropdown" onclick="fetch_theatre()">
+                            <option value="">Select Theatre</option>
                         </select>
                     </div>
                     </div>
+                    
+                    <div class="select-ward listing">
+                      <h3>Select Ward</h3>
+                      <div class="each_sections">
+                        <div class="form-control">
+                        <label>Ward 1</label>
+                      <select name="" id="">
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                      </select>
+                        </div>
+
+                        <div class="form-control">
+                      <label>Ward 2</label>
+                      <select name="" id="">
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                      </select>
+                      </div>
+                    </div>
+                    <button class="bg-white">Book ward</button>
+                    <button class="bg-white" onclick="uploadSection()">Upload consent form</button>
                     <button class="bg-blue">Book</button>
+                    </div>
+
+                   
                 </form>
             </div>
           </div>

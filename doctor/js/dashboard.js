@@ -1279,3 +1279,38 @@ function move_patient(doctor_id,doctor_appointment_id) {
 
 
   
+  function fetchDiagnoses(query) {
+    if (query.length < 2) {
+        document.getElementById("diagnosisDropdown").style.display = "none"; // Hide dropdown when input is too short
+        return;
+    }
+
+    fetch(`https://clinicaltables.nlm.nih.gov/api/conditions/v3/search?terms=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            let suggestions = data[3]; // Array of diagnosis names
+            populateDiagnosisDropdown(suggestions);
+        })
+        .catch(error => console.log("Error fetching diagnoses:", error));
+}
+
+function populateDiagnosisDropdown(suggestions) {
+    const dropdown = document.getElementById("diagnosisDropdown");
+    dropdown.innerHTML = ""; // Clear previous options
+    if (suggestions.length === 0) {
+        dropdown.style.display = "none"; // Hide if no suggestions
+        return;
+    }
+    suggestions.forEach(condition => {
+        const option = document.createElement("option");
+        option.value = condition[0]; // Set the value as diagnosis name
+        option.text = condition[0];
+        dropdown.appendChild(option);
+    });
+    dropdown.style.display = "block"; // Show dropdown with suggestions
+}
+
+function selectDiagnosis(condition) {
+    document.getElementById("condition").value = condition;
+    document.getElementById("diagnosisDropdown").style.display = "none"; // Hide dropdown after selection
+}

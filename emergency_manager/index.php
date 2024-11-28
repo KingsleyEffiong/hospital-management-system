@@ -186,10 +186,10 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
   <div class="">
     <button onclick="docForm(),getDoctorsRoles()" class="bg-blue">Transfer to doctor</button>
     <button onclick="nurseForm(),getnurse();" class="bg-blue">Transfer to nurse</button>
-    <button onclick="surgicalsuiteForm()" class="bg-blue">Transfer to surgical suite</button>
-    <button onclick="labForm()" class="bg-blue">Transfer to lab</button>
-    <button onclick="radiologyForm()" class="bg-blue">Transfer to radiology</button>
-    <button onclick="morgueForm()" class="bg-blue">Transfer to Morgue</button>
+    <button onclick="surgicalsuiteForm(),get_surgical_suite();" class="bg-blue">Transfer to surgical suite</button>
+    <button onclick="labForm(),get_lab();" class="bg-blue">Transfer to lab</button>
+    <button onclick="radiologyForm(),get_radiology();" class="bg-blue">Transfer to radiology</button>
+    <button onclick="morgueForm(),get_morgue();" class="bg-blue">Confirm Dead</button>
     <button onclick="isPatientStable()" class="bg-blue">Is the patient stable</button>
   </div>
 </div>
@@ -315,11 +315,8 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
   <div class="each_sections">
 <div class="form-control">
 <label>Available attendant</label>
-<select  id="select_sur">
-<option value="">Doc. Mathew </option>
-<option value="">Doc. Prince</option>
-<option value="">Doc. Peter</option>
-<option value="">Doc. Patrick</option>
+<select  id="select_surgical_suite">
+  <option value="" >Loading</option>
 </select>
   </div>
   </div>
@@ -351,21 +348,18 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
   <div class="each_sections">
   <div class="form-control">
     <label>Selected date</label>
-    <input type="date" name="selected_date" />
+    <input type="date" value="" id="selected_date" name="selected_date" />
   </div>
   <div class="form-control">
     <label>Selected time</label>
-    <input type="time" name="selected_time" />
+    <input type="time" value="" id="selected_time" name="selected_time" />
   </div>
   </div>
   <div class="each_sections">
 <div class="form-control">
 <label>Available lab scientist</label>
 <select  id="select_lab">
-<option value="" >Doc. Mathew </option>
-<option value="">Doc. Prince</option>
-<option value="">Doc. Peter</option>
-<option value="">Doc. Patrick</option>
+  <option value="" >Loading</option>
 </select>
   </div>
   </div>
@@ -396,21 +390,18 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
   <div class="each_sections">
   <div class="form-control">
     <label>Selected date</label>
-    <input type="date" name="selected_date" />
+    <input type="date" id="selected_date" name="selected_date" />
   </div>
   <div class="form-control">
     <label>Selected time</label>
-    <input type="time" name="selected_time" />
+    <input type="time" id="selected_time" name="selected_time" />
   </div>
   </div>
   <div class="each_sections">
 <div class="form-control">
 <label>Available radiology scientist</label>
 <select  id="select_rad">
-<option value="">Doc. Mathew </option>
-<option value="">Doc. Prince</option>
-<option value="">Doc. Peter</option>
-<option value="">Doc. Patrick</option>
+  <option value="" >Loading</option>
 </select>
   </div>
   </div>
@@ -440,29 +431,27 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
   </div>
   <div class="each_sections">
   <div class="form-control">
-    <label>Selected date</label>
-    <input type="date" name="selected_date" />
+    <label>Date of death</label>
+    <input type="date" id="selected_date" name="selected_date" />
   </div>
   <div class="form-control">
-    <label>Selected time</label>
-    <input type="time" name="selected_time" />
+    <label>Time of death</label>
+    <input type="time" id="selected_time" name="selected_time" />
   </div>
   </div>
   <div class="each_sections">
 <div class="form-control">
-<label>Available radiology scientist</label>
-<select  id="select_morgue">
-<option value="">Doc. Mathew </option>
-<option value="">Doc. Prince</option>
-<option value="">Doc. Peter</option>
-<option value="">Doc. Patrick</option>
-</select>
+<label>Available Morgue Unit</label>
+  <select  id="select_morgue">
+    <option value="" >Loading</option>
+  </select>
   </div>
   </div>
   <div class="each_sections">
   <div class="form-control">
     <label>Comment</label>
     <textarea id="comment"></textarea>
+    <!-- <input type="hidden" value ="?php echo $s_emergency_unit_id ?>" id="emergency_unit_id" /> -->
   </div>
   </div>
 <button type="button" class="bg-blue" onclick="bookMorgueForm()">Submit</button>  
@@ -474,27 +463,28 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
   <h4>Transfer patient to health record</h4>
 <button class="btn--close-modal" onclick="closeModal('healthrecordForm')">&times;</button>
   <form action="" id="bookhealthrecordForm">
-  <div class="each_sections">
-  <div class="form-control">
-    <label>Patient Name</label>
-    <input type="text" name="patient_name" id="name"/>
-  </div>
-  <div class="form-control">
-    <label>Patient Id</label>
-    <input type="text" name="patient_id" id="id"/>
-  </div>
-  <div class="form-control">
-    <label>Gender</label>
-    <input type="text" name="" id="gender"/>
-  </div>
-  </div>
-  <div class="each_sections">
-  <div class="form-control">
-    <label>Comment</label>
-    <textarea id="comment"></textarea>
-  </div>
-  </div>
-<button type="button" class="bg-blue" onclick="bookHealthRecordForm()">Submit</button>  
+      <div class="each_sections">
+      <div class="form-control">
+        <label>Patient Name</label>
+        <input type="text" name="name" id="name"/>
+      </div>
+      <div class="form-control">
+        <label>Patient Id</label>
+        <input type="text" name="id" value="" id="id"/>
+      </div>
+      <div class="form-control">
+        <label>Gender</label>
+        <input type="text" name="gender" value="" id="gender"/>
+      </div>
+      </div>
+      <div class="each_sections">
+      <div class="form-control">
+        <label>Comment</label>
+        <textarea id="health_record_comment"></textarea>
+        <input type="hidden" value ="<?php echo $s_emergency_unit_id ?>" id="emergency_unit_id" />
+      </div>
+      </div>
+    <button type="button" class="bg-blue" onclick="bookHealthRecordForm()">Submit</button>  
   </form>
 </div>
 
@@ -529,8 +519,16 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
                             
                     $sn = 1; // Serial number counter
                     while ($row = mysqli_fetch_assoc($result)) {
-                        // Determine status
-                        $status = ($row['status_id'] == 1) ? 'Active' : 'Inactive';
+                        // Determine status icon and color based on status_id
+                        if ($row['status_id'] == 1) {
+                            $status_icon = '<i class="bi bi-circle-fill"title= "Stable and Transfered"  style="color: lime;"></i>';
+                        } elseif ($row['status_id'] == 2) {
+                            $status_icon = '<i class="bi bi-circle-fill" title= "Unstable" style="color: yellow;"></i>';
+                        } elseif ($row['status_id'] == 3) {
+                            $status_icon = '<i class="bi bi-circle-fill" title= "Deceased" style="color: red;"></i>';
+                        } else {
+                            $status_icon = '<i class="bi bi-circle-fill" style="color: grey;"></i>'; // Default for any other status
+                        }
                         
                         echo '<tr>
                                 <td>' . $sn++ . '</td>
@@ -540,7 +538,7 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
                                 <td>' . htmlspecialchars($row['cause_of_incident']) . '</td>
                                 <td>' . htmlspecialchars($row['date_of_incident']) . '</td>
                                 <td>' . htmlspecialchars($row['time_of_incident']) . '</td>
-                                <td>' . $status . '</td>
+                                <td>' . $status_icon . '</td>
                                 <td><i class="bi bi-three-dots" onclick="showBookModal(event)"></i></td>
                               </tr>';
                     }
@@ -550,6 +548,7 @@ $page = "emergency_unit_dash"; // Assign the value "emergency_unit_dash" to the 
                     echo '<p>No data found.</p>';
                 }
                 ?>
+
 
 
 <script>

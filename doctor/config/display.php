@@ -1358,8 +1358,10 @@ $patient_id = $_POST['patient_Id'];
             <input type="text" name="" id="">
             </div>
             <div class="form-control">
-            <label for="">Diagnosis</label>
-            <input type="text" name="condition" id="condition">
+            <label for="condition">Diagnosis</label>
+            <input type="text" id="condition" onkeyup="fetchDiagnoses(this.value)" autocomplete="off">
+            <select id="diagnosisDropdown" size="5" style="display:none;" onchange="selectDiagnosis(this.value)">
+            </select>
             </div>
         </form>
         <button class="bg-white">Enter</button>
